@@ -12,7 +12,7 @@ class AdvancedAnimationsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Advanced Animations Lab',
+      title: 'Advanced Animations ShowCase',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
