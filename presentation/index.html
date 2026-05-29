@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flutter Advanced Animations Slide Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- BACKGROUND DECORATIONS -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-grid"></div>
+
+  <!-- MAIN SLIDES Container -->
+  <div class="slides-container">
+
+    <!-- SLIDE 1: Title -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-content title-slide">
+        <div class="tag">EXPERT GUIDES</div>
+        <h1 class="glitch-title">FLUTTER<br><span class="highlight">ADVANCED ANIMATIONS</span></h1>
+        <p class="subtitle">Micro-interactions, Rendering Engine Pipeline, Performance Auditing, and Multi-threading with Isolates</p>
+        
+        <div class="navigation-prompt">
+          <span>Press <strong>→</strong> or <strong>Space</strong> to navigate</span>
+          <div class="chevron-pulse"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Implicit vs Explicit -->
+    <section class="slide" id="slide-2">
+      <div class="slide-content">
+        <h2>1. Animation Taxonomy in Flutter</h2>
+        <p class="section-desc">Flutter categorizes animation into two structural philosophies based on lifecycle control.</p>
+        
+        <div class="grid-2">
+          <!-- Implicit Card -->
+          <div class="glass-card card-hover glow-blue">
+            <div class="card-header">
+              <span class="badge badge-blue">FRAMEWORK-MANAGED</span>
+              <h3>Implicit Animations</h3>
+            </div>
+            <p>Self-contained widgets that automatically animate style values whenever their constructor parameters change.</p>
+            <ul>
+              <li><strong>Mechanism:</strong> Requires <code>setState()</code> on target fields. Flutter handles the controller.</li>
+              <li><strong>Standard Widgets:</strong> <code>AnimatedContainer</code>, <code>AnimatedOpacity</code>, <code>AnimatedPadding</code>, <code>AnimatedAlign</code>.</li>
+              <li><strong>Bespoke Custom:</strong> <code>TweenAnimationBuilder</code> for custom values.</li>
+              <li><strong>Pros:</strong> Zero boilerplate, seamless interruptions.</li>
+            </ul>
+            <div class="demo-zone">
+              <div class="demo-controls">
+                <button onclick="toggleImplicitDemo()" class="btn btn-blue">Trigger setState()</button>
+              </div>
+              <div class="demo-stage">
+                <div id="implicit-box" class="demo-box"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Explicit Card -->
+          <div class="glass-card card-hover glow-purple">
+            <div class="card-header">
+              <span class="badge badge-purple">DEVELOPER-CONTROLLED</span>
+              <h3>Explicit Animations</h3>
+            </div>
+            <p>Direct controller management enabling repetitive, staggered, reversed, or gesture-driven motions.</p>
+            <ul>
+              <li><strong>Mechanism:</strong> Developer declares <code>AnimationController</code> and listens to tickers.</li>
+              <li><strong>Standard Widgets:</strong> <code>RotationTransition</code>, <code>ScaleTransition</code>, <code>AnimatedBuilder</code>.</li>
+              <li><strong>Pros:</strong> Granular control, custom speeds, loops, sequence synchronization.</li>
+              <li><strong>Requirement:</strong> Must be disposed explicitly in <code>dispose()</code> to prevent memory leak.</li>
+            </ul>
+            <div class="demo-zone">
+              <div class="demo-controls">
+                <button onclick="startExplicit()" class="btn btn-purple">Play</button>
+                <button onclick="pauseExplicit()" class="btn btn-purple">Pause</button>
+                <button onclick="reverseExplicit()" class="btn btn-purple">Reverse</button>
+              </div>
+              <div class="demo-stage">
+                <div id="explicit-box" class="demo-box rotate-box">
+                  <div class="inner-core"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Rendering Pipeline -->
+    <section class="slide" id="slide-3">
+      <div class="slide-content">
+        <h2>2. The 16ms Rendering Pipeline</h2>
+        <p class="section-desc">What occurs under the hood when a ticker ticks? Optimizing animations means understanding execution steps.</p>
+        
+        <div class="pipeline-flow">
+          <div class="pipeline-card active-card">
+            <div class="pipeline-num">01</div>
+            <h4>Animate</h4>
+            <p>System ticker triggers frame request (~16.6ms for 60Hz). AnimationController ticks and recalculates current interpolated progress along chosen Curve bounds (0.0 to 1.0).</p>
+          </div>
+          <div class="pipeline-arrow">➔</div>
+          <div class="pipeline-card active-card">
+            <div class="pipeline-num">02</div>
+            <h4>Build</h4>
+            <p>Marked widgets are rebuild. <code>AnimatedBuilder</code> calls trigger widgets rebuild containing the newly updated fractional value.</p>
+          </div>
+          <div class="pipeline-arrow">➔</div>
+          <div class="pipeline-card active-card">
+            <div class="pipeline-num">03</div>
+            <h4>Layout</h4>
+            <p>Size constraints traverse down and sizes bubble up. Animating structural sizes (height/width/margin) triggers full re-layout, draining hardware power.</p>
+          </div>
+          <div class="pipeline-arrow">➔</div>
+          <div class="pipeline-card active-card">
+            <div class="pipeline-num">04</div>
+            <h4>Paint</h4>
+            <p>Canvases record drawing lists and rasterize. Isolating vector rendering with <code>RepaintBoundary</code> skips re-painting surrounding UI.</p>
+          </div>
+        </div>
+
+        <div class="glass-card performance-note">
+          <span class="warning-tag">PRO-TIP: BYPASS THE LAYOUT PHASE</span>
+          <p>Animating layout boundaries forces parents to recalculate layout hierarchies. Always prefer <code>Transform</code> scale, rotation, and translation, which operate entirely in the <strong>Paint/Raster</strong> stage, bypassing expensive structural updates.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Performance Auditing & Pitfalls -->
+    <section class="slide" id="slide-4">
+      <div class="slide-content">
+        <h2>3. Performance Pitfalls & Engine Tuning</h2>
+        <p class="section-desc">Mobile applications stagger and drop frames when developers violate rendering patterns.</p>
+        
+        <div class="grid-2">
+          <!-- Pitfalls -->
+          <div class="glass-card glow-red">
+            <h3 class="red-header">❌ Common Optimization Killers</h3>
+            <div class="pitfall-list">
+              <div class="pitfall-item">
+                <h5>Rebuilding Large Subtrees</h5>
+                <p>Creating massive static widget trees inside an <code>AnimatedBuilder</code> builder callback, forcing complete widget reconstructions on every single frame.</p>
+              </div>
+              <div class="pitfall-item">
+                <h5>Failing to Dispose Controllers</h5>
+                <p>Leaving active controllers and single-ticker providers ticking in the background, causing continuous CPU cycling after screen navigation.</p>
+              </div>
+              <div class="pitfall-item">
+                <h5>UI-Thread Computations</h5>
+                <p>Computing mathematical positions, physics nodes, or parsing complex JSON files inside the main event loop while animations are ticking.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optimizations -->
+          <div class="glass-card glow-green">
+            <h3 class="green-header">✓ Pro-Tuning Techniques</h3>
+            <div class="pitfall-list">
+              <div class="pitfall-item">
+                <h5>Static Subtree Caching</h5>
+                <p>Pass your non-animating widgets into the <code>child</code> parameter of <code>AnimatedBuilder</code>, referencing it in the callback to bypass rebuild cycles.</p>
+              </div>
+              <div class="pitfall-item">
+                <h5>Layer Isolation via RepaintBoundary</h5>
+                <p>Wrap custom painters, graphics, or vectors inside a <code>RepaintBoundary</code>, allowing Skia/Impeller to draw from pre-baked caches instead of recalculating lines.</p>
+              </div>
+              <div class="pitfall-item">
+                <h5>Offloading calculations to Isolates</h5>
+                <p>Spin up background threads to handle mathematical and physical data generations, keeping the UI thread completely unburdened.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Threading & Isolates -->
+    <section class="slide" id="slide-5">
+      <div class="slide-content">
+        <h2>4. The Threading Frontier: Background Isolates</h2>
+        <p class="section-desc">Why single threading locks up rendering, and how to achieve buttery-smooth 60/120 FPS.</p>
+        
+        <div class="grid-2">
+          <div class="glass-card">
+            <h3>Event Loop Jank vs Multi-threading</h3>
+            <p>Dart handles operations on a single-threaded <strong>Main Isolate</strong>. The Event Loop prioritizes events in sequence. If a CPU task takes >10ms, the next drawing tick misses its deadline.</p>
+            
+            <div class="isolate-features">
+              <div class="feat">
+                <h5>Zero Shared Memory</h5>
+                <p>Isolates run on isolated heaps. Race conditions are impossible. Data transfer happens by copy-on-write messages over ports.</p>
+              </div>
+              <div class="feat">
+                <h5>ReceivePort & SendPort</h5>
+                <p>Create communication ports. Send computed node batches from background threads back to the main canvas.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Thread Simulator -->
+          <div class="glass-card interactive-simulator">
+            <h3>Isolate Thread Simulator</h3>
+            <p>Try starting the computational stress test. Toggling modes will prove how single-threaded blocking behaves.</p>
+            
+            <div class="simulator-panel">
+              <div class="sim-toggle-row">
+                <button id="btn-main-thread" onclick="runSim(true)" class="btn btn-red">Stress Test: Main Thread</button>
+                <button id="btn-isolate-thread" onclick="runSim(false)" class="btn btn-green">Stress Test: Background Isolate</button>
+              </div>
+              
+              <div class="visualizer-box">
+                <div class="sim-stats">
+                  <span>Frame Rate: <strong id="sim-fps" class="fps-normal">60 FPS</strong></span>
+                  <span>Computation: <span id="sim-status">Idle</span></span>
+                </div>
+                <div class="animating-indicator">
+                  <div id="sim-spinner" class="spinner"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- NAVIGATION OVERLAY CONTROLS -->
+  <div class="presentation-footer">
+    <div class="footer-logo">ANTIGRAVITY ACADEMY</div>
+    <div class="footer-nav">
+      <button onclick="prevSlide()" class="footer-btn">Prev</button>
+      <div id="slide-indicators" class="indicators">
+        <!-- populated by JS -->
+      </div>
+      <button onclick="nextSlide()" class="footer-btn">Next</button>
+    </div>
+    <div class="footer-counter"><span id="current-index">1</span> / <span id="total-count">5</span></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
