@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project/screens/rendering/rendering_optimization_screen.dart';
 import '../utils/responsive.dart';
 import '../widgets/fps_counter.dart';
 import 'implicit_playground.dart';
@@ -98,6 +99,19 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ),
         );
       },
+    ),
+    _LabEntry(
+      title: 'Rendering Optimization',
+      subtitle:
+      'GPU Shaders, Flow layouts, PictureRecorder caching, Rive & Impeller.',
+      icon: Icons.speed,
+      color: Colors.cyanAccent,
+      onTap: (context) => () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const RenderingOptimizationScreen(),
+        ),
+      ),
     ),
   ];
 
