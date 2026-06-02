@@ -142,27 +142,27 @@ class RenderingOptimizationScreen extends StatelessWidget {
             },
           ),
 
-          OptimizationCard(
-            title: "Rive Runtime",
-            icon: Icons.animation,
-            color: Colors.pinkAccent,
-            description:
-            "Native runtime animation engine with state machines.",
-            benefits: [
-              "Smaller than GIF",
-              "Interactive animations",
-              "Native interpolation",
-              "Low CPU load"
-            ],
-            onTap: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const RiveLabScreen(),
-                ),
-              );
-            },
-          ),
+          // OptimizationCard(
+          //   title: "Rive Runtime",
+          //   icon: Icons.animation,
+          //   color: Colors.pinkAccent,
+          //   description:
+          //   "Native runtime animation engine with state machines.",
+          //   benefits: [
+          //     "Smaller than GIF",
+          //     "Interactive animations",
+          //     "Native interpolation",
+          //     "Low CPU load"
+          //   ],
+          //   onTap: (){
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (_) => const RiveLabScreen(),
+          //       ),
+          //     );
+          //   },
+          // ),
 
           OptimizationCard(
             title: "Impeller Engine",
